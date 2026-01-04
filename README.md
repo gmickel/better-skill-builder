@@ -165,7 +165,7 @@ description: >
 ## Install This Skill
 
 ```bash
-git clone https://github.com/gmickel/gmickel-skill ~/.claude/skills/gmickel-skill
+git clone https://github.com/gmickel/better-skill-builder ~/.claude/skills/skill-builder
 ```
 
 Then ask: "How do I create an Agent Skill?"
