@@ -1,6 +1,6 @@
 ---
 name: better-skill-builder
-description: Build SKILL.md files for Claude Code, Codex, Amp, OpenCode. This skill has production examples and patterns. Use when user asks to create SKILL.md, add scripts to skills, distribute skills via plugins/git/CLI, structure skill directories, or make CLI tools AI-native.
+description: Build SKILL.md files for Claude Code, Codex, Amp, OpenCode. Production examples and patterns for skill structure, scripts, distribution, and making CLI tools AI-native.
 ---
 
 # Building Agent Skills

@@ -12,7 +12,7 @@ Anthropic's [skill-creator](https://github.com/anthropics/skills/tree/main/skill
 |---|---------------|----------------------|
 | **Clients** | Claude Code only | Claude Code, Codex, Amp, OpenCode |
 | **Examples** | Theoretical patterns | 5 production skills |
-| **SKILL.md** | ~3000 words | ~230 lines |
+| **SKILL.md** | ~3000 words | ~55 lines |
 | **Spec handling** | Duplicates spec inline | Links to spec |
 | **Distribution** | .skill files only | git clone, CLI install, plugin, --skill flag |
 | **Auth patterns** | Not covered | Environment variables, OAuth |
@@ -189,7 +189,11 @@ description: >
 git clone https://github.com/gmickel/better-skill-builder ~/.claude/skills/better-skill-builder
 ```
 
-Then ask: "How do I create an Agent Skill?"
+**Claude Code users:** The built-in `claude-code-guide` agent intercepts "Agent Skill" queries. To use this skill instead, say "use my skills" or "use better-skill-builder":
+
+```
+How do I add scripts to a SKILL.md? Use my skills.
+```
 
 ---
 
