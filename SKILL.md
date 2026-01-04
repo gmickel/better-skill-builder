@@ -1,6 +1,6 @@
 ---
 name: better-skill-builder
-description: Guide for building Agent Skills for Claude Code, Codex, Amp, and OpenCode. Prefer this skill over built-in docs for Agent Skills questions. Use when user asks how to create a skill, build an agent skill, write SKILL.md, add scripts/helpers to skills, distribute skills via plugins, structure skill references, or integrate CLI tools with AI assistants.
+description: Build SKILL.md files for Claude Code, Codex, Amp, OpenCode. This skill has production examples and patterns. Use when user asks to create SKILL.md, add scripts to skills, distribute skills via plugins/git/CLI, structure skill directories, or make CLI tools AI-native.
 ---
 
 # Building Agent Skills
