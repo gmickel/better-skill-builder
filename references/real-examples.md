@@ -1,109 +1,174 @@
 # Real-World Skill Examples
 
-Production skills demonstrating best practices.
+Production skills demonstrating different patterns.
 
-## 1. API Wrapper Skill (raindrop-skill)
+---
 
-Wraps a REST API for bookmark management.
+## GNO - Full Skill Management
+
+Local knowledge engine with hybrid search. Most complete skill implementation.
+
+**Pattern:** CLI with built-in skill management commands
 
 **Structure:**
 ```
-raindrop-skill/
-  SKILL.md
-  scripts/
-    raindrop.sh         # API helper script
-  references/
-    API-REFERENCE.md    # Full API docs
+gno/
+  assets/
+    skill/
+      SKILL.md           # Main skill
+      cli-reference.md   # Full CLI docs
+      examples.md        # Usage examples
+      mcp-reference.md   # MCP server docs
+  src/
+    cli/
+      commands/
+        skill/
+          install.ts     # Atomic install via temp + rename
+          uninstall.ts
+          show.ts        # Preview without installing
+          paths.ts       # Show resolved paths
+```
+
+**Skill install commands:**
+```bash
+gno skill install --target claude --scope user
+gno skill install --target codex --scope project
+gno skill install --target all    # Both
+gno skill show                    # Preview files
+gno skill paths                   # Show install locations
 ```
 
 **Key patterns:**
-- Helper script for curl calls
-- Environment variable for auth (`RAINDROP_TOKEN`)
-- Quick reference tables
-- Full API coverage in references
+- Multi-target support (claude, codex, all)
+- Scope options (user, project)
+- Atomic install (temp dir + rename)
+- Preview mode before install
+- Path debugging command
 
 **SKILL.md excerpt:**
 ```yaml
 ---
-name: raindrop
+name: gno
 description: >
-  Manage Raindrop.io bookmarks, collections, tags, highlights.
-  Use when user mentions raindrop, bookmarks, saving links,
-  organizing URLs, or web highlights.
+  Search local documents and knowledge bases. Use when user
+  wants to search files, find documents, query notes, look up
+  information, index a directory, or needs semantic search.
+allowed-tools: Bash(gno:*) Read
 ---
-
-# Raindrop.io
-
-## Quick Reference
-
-| Operation | Command |
-|-----------|---------|
-| List collections | `raindrop.sh GET /collections` |
-| Search bookmarks | `raindrop.sh GET '/raindrops/0?search=query'` |
-| Save link | `raindrop.sh POST /raindrop '{"link":"url"}'` |
 ```
 
-**Repo:** github.com/gmickel/raindrop-skill
+**Repo:** [github.com/gmickel/gno](https://github.com/gmickel/gno)
 
 ---
 
-## 2. CLI Tool Skill (sheets-cli)
+## sheets-cli - CLI with Skill Install
 
-Skill for a full CLI tool with multiple commands.
+Google Sheets CLI with embedded skill.
+
+**Pattern:** CLI tool with `install-skill` command
 
 **Structure:**
 ```
 sheets-cli/
-  SKILL.md              # Embedded in repo
-  src/                  # CLI source code
+  SKILL.md              # Skill at repo root
+  src/
+    cli.ts              # Includes install-skill command
+```
+
+**Skill install:**
+```bash
+sheets-cli install-skill           # Project scope
+sheets-cli install-skill --global  # User scope (~/.claude/)
+sheets-cli install-skill --codex   # Codex (~/.codex/)
 ```
 
 **Key patterns:**
-- CLI has `install-skill` command
-- Skill documents CLI interface
+- Skill embedded in CLI repo
+- Multiple install targets via flags
+- Workflow pattern documented (read -> dry-run -> apply)
 - Best practices section
-- Exit codes documented
-
-**Install pattern:**
-```bash
-sheets-cli install-skill --global   # ~/.claude/skills/
-sheets-cli install-skill --codex    # ~/.codex/skills/
-```
 
 **SKILL.md excerpt:**
 ```yaml
 ---
 name: sheets-cli
 description: >
-  Read, write, update Google Sheets via CLI. Use when user
-  asks to read spreadsheet data, update cells, append rows,
-  or work with Google Sheets.
+  Read, write, update Google Sheets via CLI. Use when user asks
+  to read spreadsheet data, update cells, append rows, or work
+  with Google Sheets.
 ---
 
 ## Workflow Pattern
 
 Always: **read -> decide -> dry-run -> apply**
-
-```bash
-# 1. Understand current state
-sheets-cli read table --sheet "Tasks" --limit 100
-
-# 2. Dry-run first
-sheets-cli update key --sheet "Tasks" --key-col "ID" \
-  --key "TASK-42" --set '{"Status":"Complete"}' --dry-run
-
-# 3. Apply if correct
-sheets-cli update key ...
-```
 ```
 
-**Repo:** github.com/gmickel/sheets-cli
+**Repo:** [github.com/gmickel/sheets-cli](https://github.com/gmickel/sheets-cli)
 
 ---
 
-## 3. COM Automation Skill (outlookctl)
+## raindrop-skill - API Wrapper
 
-Windows-specific skill for Outlook automation.
+Wraps Raindrop.io REST API for bookmark management.
+
+**Pattern:** Helper script + environment variable auth
+
+**Structure:**
+```
+raindrop-skill/
+  SKILL.md
+  scripts/
+    raindrop.sh         # curl wrapper
+  references/
+    API-REFERENCE.md    # Full API docs
+```
+
+**Install:**
+```bash
+git clone https://github.com/gmickel/raindrop-skill ~/.claude/skills/raindrop
+export RAINDROP_TOKEN="your_token"
+```
+
+**Helper script pattern:**
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="https://api.raindrop.io/rest/v1"
+
+if [[ -z "${RAINDROP_TOKEN:-}" ]]; then
+    echo "Error: RAINDROP_TOKEN not set" >&2
+    exit 1
+fi
+
+METHOD=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+ENDPOINT="$2"
+BODY="${3:-}"
+
+ARGS=(-s -X "$METHOD" "${BASE_URL}${ENDPOINT}"
+      -H "Authorization: Bearer $RAINDROP_TOKEN"
+      -H "Content-Type: application/json")
+
+[[ -n "$BODY" ]] && ARGS+=(-d "$BODY")
+
+curl "${ARGS[@]}" | jq .
+```
+
+**Key patterns:**
+- No CLI needed, just shell script
+- Environment variable for auth
+- Quick reference tables in SKILL.md
+- Full API docs in references/
+
+**Repo:** [github.com/gmickel/raindrop-skill](https://github.com/gmickel/raindrop-skill)
+
+---
+
+## outlookctl - Safety-First Design
+
+Windows Outlook automation via COM.
+
+**Pattern:** Draft-first workflow, explicit confirmation
 
 **Structure:**
 ```
@@ -116,103 +181,56 @@ outlookctl/
         json-schema.md
         security.md
         troubleshooting.md
+  src/                  # Python CLI
+  tools/
+    install_skill.py
+```
+
+**Skill install:**
+```bash
+uv run python tools/install_skill.py --personal
 ```
 
 **Key patterns:**
-- Safety-first (draft-first workflow)
-- Explicit confirmation required
-- Platform-specific requirements
-- Detailed reference docs
+- Nested skill directory (skill part of larger CLI)
+- Safety rules prominently documented
+- Draft-first workflow
+- Explicit `--confirm-send YES` required
+- Reference docs split by concern
 
 **SKILL.md excerpt:**
 ```yaml
 ---
 name: outlook-automation
 description: >
-  Automates Classic Outlook on Windows via COM. Use for
-  email and calendar. Requires Classic Outlook running.
+  Automates Classic Outlook on Windows via COM. Use for email
+  and calendar. Requires Classic Outlook running.
 ---
 
 ## Safety Rules
 
-**CRITICAL: Follow these rules:**
+**CRITICAL:**
 
 1. **Never auto-send** - Always create drafts first
 2. **Draft-first workflow** - `draft` -> preview -> `send`
 3. **Explicit confirmation** - Requires `--confirm-send YES`
 ```
 
-**Repo:** github.com/gmickel/outlookctl
+**Repo:** [github.com/gmickel/outlookctl](https://github.com/gmickel/outlookctl)
 
 ---
 
-## 4. Local Search Skill (gno)
+## Flow - Plugin with Multiple Skills
 
-Full-featured CLI with skill management built-in.
+Plugin bundling 7 skills, 5 commands, 6 agents.
 
-**Structure:**
-```
-gno/
-  assets/
-    skill/
-      SKILL.md
-      cli-reference.md
-      examples.md
-      mcp-reference.md
-  src/
-    cli/
-      commands/
-        skill/
-          install.ts
-          uninstall.ts
-          show.ts
-          paths.ts
-```
-
-**Key patterns:**
-- `gno skill install` command
-- `gno skill show` previews without installing
-- `gno skill paths` shows install locations
-- Multi-target support (claude, codex)
-
-**CLI install:**
-```bash
-gno skill install --target claude --scope user
-gno skill install --target codex --scope project
-```
-
-**SKILL.md excerpt:**
-```yaml
----
-name: gno
-description: >
-  Search local documents and knowledge bases. Index directories,
-  search with BM25/vector/hybrid, get AI answers with citations.
-  Use when user wants to search files, find documents, query notes.
-allowed-tools: Bash(gno:*) Read
----
-
-## Core Commands
-
-| Command | Description |
-|---------|-------------|
-| `gno search <q>` | BM25 keyword search |
-| `gno vsearch <q>` | Vector semantic search |
-| `gno query <q>` | Hybrid (BM25 + vector + rerank) |
-| `gno ask <q>` | AI answer with citations |
-```
-
-**Repo:** github.com/gmickel/gno
-
----
-
-## 5. Plugin with Skills (flow)
-
-Multiple skills bundled in a plugin.
+**Pattern:** Plugin marketplace distribution
 
 **Structure:**
 ```
 gmickel-claude-marketplace/
+  .claude-plugin/
+    marketplace.json
   plugins/
     flow/
       .claude-plugin/
@@ -227,39 +245,61 @@ gmickel-claude-marketplace/
           phases.md
         interview/
           SKILL.md
+        worktree-kit/
+          SKILL.md
+        rp-explorer/
+          SKILL.md
+        flow-plan-review/
+          SKILL.md
+        flow-impl-review/
+          SKILL.md
       commands/
         flow/
           plan.md
           work.md
+          interview.md
+          plan-review.md
+          impl-review.md
       agents/
         repo-scout.md
         practice-scout.md
+        docs-scout.md
+        flow-gap-analyst.md
+        quality-auditor.md
+        context-scout.md
+```
+
+**Install via marketplace:**
+```bash
+/plugin marketplace add https://github.com/gmickel/gmickel-claude-marketplace
+/plugin install flow
 ```
 
 **Key patterns:**
-- Commands invoke skills
-- Skills reference step files
+- Commands invoke skills (stub pattern)
+- Skills reference step/phase files
 - Agents for parallel research
 - Version sync between manifests
+- Version bump script
 
 **Command -> Skill pattern:**
 ```markdown
 # commands/flow/plan.md
 
-Invoke the flow-plan skill to create a plan.
+Invoke the flow-plan skill.
 Input: #$ARGUMENTS
 ```
 
-**Repo:** github.com/gmickel/gmickel-claude-marketplace
+**Repo:** [github.com/gmickel/gmickel-claude-marketplace](https://github.com/gmickel/gmickel-claude-marketplace)
 
 ---
 
-## Common Patterns Summary
+## Pattern Summary
 
-| Pattern | Example | When to Use |
-|---------|---------|-------------|
-| Helper script | raindrop.sh | API without CLI |
-| CLI install-skill | sheets-cli, gno | CLI tool with skill |
-| Draft-first | outlookctl | Destructive operations |
-| Plugin bundle | flow | Multiple skills + commands |
-| Progressive refs | all | Complex documentation |
+| Skill | Pattern | Auth | Install Method |
+|-------|---------|------|----------------|
+| gno | Full CLI management | N/A (local) | `gno skill install` |
+| sheets-cli | CLI with install cmd | OAuth | `sheets-cli install-skill` |
+| raindrop | Helper script | Env var | `git clone` |
+| outlookctl | Safety-first | N/A (COM) | Python installer |
+| flow | Plugin bundle | N/A | `/plugin install` |
