@@ -1,5 +1,5 @@
 ---
-name: skill-builder
+name: better-skill-builder
 description: Guide for building Agent Skills for Claude Code, Codex, Amp, and OpenCode. Use when user asks how to create a skill, build an agent skill, write SKILL.md, distribute skills via plugins, or integrate CLI tools with AI assistants.
 ---
 

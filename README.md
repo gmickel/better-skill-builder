@@ -186,7 +186,7 @@ description: >
 ## Install This Skill
 
 ```bash
-git clone https://github.com/gmickel/better-skill-builder ~/.claude/skills/skill-builder
+git clone https://github.com/gmickel/better-skill-builder ~/.claude/skills/better-skill-builder
 ```
 
 Then ask: "How do I create an Agent Skill?"
