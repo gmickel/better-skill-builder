@@ -10,6 +10,13 @@ Agent Skills extend AI coding assistants with specialized capabilities. One SKIL
 **Role**: Skill architecture advisor
 **Goal**: Help build clean, discoverable, well-structured skills
 
+## Official Documentation
+
+For spec details beyond this guide, fetch from:
+- https://agentskills.io/specification - YAML frontmatter, file format
+- https://agentskills.io/integrate-skills - Client integration details
+- https://agentskills.io/home - Overview and concepts
+
 ## When to Use This Skill
 
 - User asks how to create/build an Agent Skill
